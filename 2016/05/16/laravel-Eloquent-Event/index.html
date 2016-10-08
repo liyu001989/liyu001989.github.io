@@ -45,7 +45,7 @@
 <p>这下应该就明白了，初始化一个模型的时候这两个数组是一样的，赋值操作只是改变attributes，所以isDirty也就是根据两个数据来判断模型是否dirty了，模型触发完<code>saved</code>事件后才会执行syncOriginal，syncOriginal也就是将attributes赋值给original。所以上面触发的所有事件，我们都是能拿到原来的值和变化的值得。</p>
 <p>所以我们的问题也就解决了，当模型触发<code>updated</code>事件的时候，我们根据isDirty([‘status’]) 知道订单状态改变了，然后拿到订单之前是个什么样子，改变后是个什么样子，该发什么消息也就很明朗了。</p>
 <p>laravel设计的好牛逼，事实教育我们，要多看文档，多看代码。幸好我机智的看了代码，要是用了2，3两个方案，我不是该哭了？</p>
-</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://blog.lyyw.com/2016/05/16/laravel-Eloquent-Event/" data-id="cisa56kc3000dytrusny0v3uj" class="article-share-link">分享到</a><div class="tags"><a href="/tags/laravel/">laravel</a></div><div class="post-nav"><a href="/2016/05/18/ubuntu-搭建-openvpn-记录/" class="pre">ubuntu 搭建 openvpn 记录</a><a href="/2016/05/11/2016-plan/" class="next">2016 计划</a></div><div id="disqus_thread"><script>var disqus_shortname = 'lyywinfo';
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://blog.lyyw.com/2016/05/16/laravel-Eloquent-Event/" data-id="ciu1bbbd90009lhru9bvcjtzu" class="article-share-link">分享到</a><div class="tags"><a href="/tags/laravel/">laravel</a></div><div class="post-nav"><a href="/2016/05/18/ubuntu-搭建-openvpn-记录/" class="pre">ubuntu 搭建 openvpn 记录</a><a href="/2016/05/11/2016-plan/" class="next">2016 计划</a></div><div id="disqus_thread"><script>var disqus_shortname = 'lyywinfo';
 var disqus_identifier = '2016/05/16/laravel-Eloquent-Event/';
 var disqus_title = 'laravel Eloquent save 触发了哪些事件';
 var disqus_url = 'http://blog.lyyw.com/2016/05/16/laravel-Eloquent-Event/';

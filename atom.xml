@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.lyyw.com/"/>
-  <updated>2017-05-05T11:23:36.000Z</updated>
+  <updated>2017-03-06T15:39:37.000Z</updated>
   <id>http://blog.lyyw.com/</id>
   
   <author>
@@ -14,51 +14,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>2017-03-12 [吐槽]如何在错误的道路上越走越远</title>
-    <link href="http://blog.lyyw.com/2017/03/12/2017-03-12-%E5%A6%82%E4%BD%95%E5%9C%A8%E9%94%99%E8%AF%AF%E7%9A%84%E9%81%93%E8%B7%AF%E4%B8%8A%E8%B6%8A%E8%B5%B0%E8%B6%8A%E8%BF%9C/"/>
-    <id>http://blog.lyyw.com/2017/03/12/2017-03-12-如何在错误的道路上越走越远/</id>
-    <published>2017-03-12T10:21:05.000Z</published>
-    <updated>2017-05-05T11:23:36.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>吐槽与第三方平台对接的过程中，看着对方在错误的道路上越走越远，已然起飞。</p>
-<p>重庆某A公司，做支付平台的，大家理解为超低配支付宝 ( 我感觉我侮辱了支付宝 )。我们因为一些机(li)缘(yi)巧(gou)合(dang)，必须使用它们的产品，但是这个产品的实现真的是….</p>
-<h2 id="签名"><a href="#签名" class="headerlink" title="签名"></a>签名</h2><p>首先签名是必要的，证明我是我，你是你, 但是A公司是这么做的</p>
-<pre><code>分配给我们一个公钥，它们保留私钥，我们请求的数据是下面这个样子
-
-POST form_data
-
-data:{&quot;xx&quot;:&quot;xxx&quot;,&quot;ccc&quot;:&quot;ccc&quot;}
-sign:xxxxxxx
-</code></pre><p>form_data 数据是个 json，然后<strong>将 data 中的数据用他们分配的公钥进行加密放在 sign 里面</strong>。把数据又加密了一遍，当做签名使用，A 公司显然不明白签名是个啥意思。</p>
-<ul>
-<li>A 公司不懂签名和加密的区别，不懂公钥私钥的使用方法</li>
-<li>所以他们分配给我们一个公钥，让我们用公钥再加密一遍数据</li>
-<li>参数是个保证不了长度的东西，公钥加密长度有限制，那么就必须分段加密，把参数拆开，加密，再拼接在一起</li>
-<li>参数加密后的结果同样保证不了长度，浏览器url长度有不同的限制，所以，必须使用POST方式。</li>
-<li>这样就导致客户端没法先访问我们的服务器，然后我们服务器签名数据跳转过去，那么只能是客户端请求我们的服务器，我们返回数据和所谓的签名给客户端，客户端自己通过 post 的方式打开 webview。</li>
-</ul>
-<h2 id="另一件恶心的事"><a href="#另一件恶心的事" class="headerlink" title="另一件恶心的事"></a>另一件恶心的事</h2><ul>
-<li>回调的数据居然 header content-type 是 text/plain, 但是数据是json。</li>
-<li>这种说话方式就跟，“你会说中文吗”，“会的”，“hello，I’m A”。</li>
-</ul>
-<h2 id="回到正确的道路上"><a href="#回到正确的道路上" class="headerlink" title="回到正确的道路上"></a>回到正确的道路上</h2><p>巩固一下上面的知识点</p>
-<ul>
-<li>介绍公钥私钥的文章一大堆，签名就是签名，加密就是加密。我用私钥将数据签名，其他人用公钥验证签名，证明数据我的，没有被篡改和伪造。</li>
-<li>介绍公钥私钥的文章一大堆，从来没有人把公钥加密后的数据称作签名，签名就是签名，加密就是加密，</li>
-</ul>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;吐槽与第三方平台对接的过程中，看着对方在错误的道路上越走越远，已然起飞。&lt;/p&gt;
-&lt;p&gt;重庆某A公司，做支付平台的，大家理解为超低配支付宝 ( 我感觉我侮辱了支付宝 )。我们因为一些机(li)缘(yi)巧(gou)合(dang)，必须使用它们的产品，但是这个产品的实现真的是
-    
-    </summary>
-    
-    
-  </entry>
   
   <entry>
     <title>webpack 压缩的一个坑</title>

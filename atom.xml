@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.lyyw.com/"/>
-  <updated>2017-08-20T09:44:34.000Z</updated>
+  <updated>2017-08-20T11:29:10.000Z</updated>
   <id>http://blog.lyyw.com/</id>
   
   <author>
@@ -16,11 +16,11 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>2017-08-19 “x分钟之前” 需要由接口返回吗？</title>
+    <title>“x分钟之前” 需要由接口返回吗？</title>
     <link href="http://blog.lyyw.com/2017/08/19/2017-08-19-%E2%80%9Cx%E5%88%86%E9%92%9F%E4%B9%8B%E5%89%8D%E2%80%9D-%E9%9C%80%E8%A6%81%E7%94%B1%E6%8E%A5%E5%8F%A3%E8%BF%94%E5%9B%9E%E5%90%97%EF%BC%9F/"/>
     <id>http://blog.lyyw.com/2017/08/19/2017-08-19-“x分钟之前”-需要由接口返回吗？/</id>
     <published>2017-08-19T14:15:32.000Z</published>
-    <updated>2017-08-20T09:44:34.000Z</updated>
+    <updated>2017-08-20T11:29:10.000Z</updated>
     
     <content type="html"><![CDATA[<p>突然回忆起来之前跟同事们争论的一个问题，记录一下。</p>
 <p><strong>主要问题是，当页面中显示 xx 分钟，或 xx 小时，是由服务器处理还是客户端处理。</strong></p>

@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.lyyw.com/"/>
-  <updated>2017-08-08T15:35:20.000Z</updated>
+  <updated>2017-08-20T09:44:34.000Z</updated>
   <id>http://blog.lyyw.com/</id>
   
   <author>
@@ -16,9 +16,81 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>2017-08-19 “x分钟之前” 需要由接口返回吗？</title>
+    <link href="http://blog.lyyw.com/2017/08/19/2017-08-19-%E2%80%9Cx%E5%88%86%E9%92%9F%E4%B9%8B%E5%89%8D%E2%80%9D-%E9%9C%80%E8%A6%81%E7%94%B1%E6%8E%A5%E5%8F%A3%E8%BF%94%E5%9B%9E%E5%90%97%EF%BC%9F/"/>
+    <id>http://blog.lyyw.com/2017/08/19/2017-08-19-“x分钟之前”-需要由接口返回吗？/</id>
+    <published>2017-08-19T14:15:32.000Z</published>
+    <updated>2017-08-20T09:44:34.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>突然回忆起来之前跟同事们争论的一个问题，记录一下。</p>
+<p><strong>主要问题是，当页面中显示 xx 分钟，或 xx 小时，是由服务器处理还是客户端处理。</strong></p>
+<p>举个例子，我们有一个资源，比如帖子吧 posts，数据返回如下</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    <span class="attr">"id"</span>: <span class="number">1</span>,</div><div class="line">    <span class="attr">"user_id"</span>: <span class="number">1</span>,</div><div class="line">    <span class="attr">"title"</span>: <span class="string">"标题"</span>,</div><div class="line">    <span class="attr">"content"</span>: <span class="string">"内容"</span>,</div><div class="line">    <span class="attr">"created_at"</span>: <span class="string">"2017-08-20 15:13:52"</span>,</div><div class="line">    <span class="attr">"updated_at"</span>: <span class="string">"2017-08-20 15:13:52"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们所有的接口，统一都会有 <code>created_at</code> 这个数据，格式统一为 <code>yyyy-mm-dd HH:mm:ss</code>。</p>
+<ul>
+<li>接口在数据中，找个地方返回 <code>&quot;5 分钟前&quot;</code></li>
+<li>客户端通过 <code>created_at</code> 按照自己的需求做格式化</li>
+</ul>
+<p>哪一种解决方法更好呢</p>
+<h2 id="一系列问题及讨论"><a href="#一系列问题及讨论" class="headerlink" title="一系列问题及讨论"></a>一系列问题及讨论</h2><ul>
+<li><p><strong>服务器能把这个时间处理好，返回给客户端吗？</strong></p>
+<p>  我们完成一套接口，肯定是希望接口足够通用，我一点也不想考虑这个地方显示 “60 秒前” 还是 “1 分钟前”，鬼知道今天的设计稿和明天的设计稿还会不会是同一个样子。所以接口的通用性，应该体现在，<strong>我能满足任何设计稿，任何客户端的显示，但是当设计稿改变了，接口不会做乱七八糟的调整</strong>。</p>
+<p>  <code>created_at</code> 这种字段不可能改变，格式必须统一。</p>
+</li>
+<li><p><strong>能不能新加一个字段，返回 <code>x 分钟前</code></strong></p>
+<p>  新加一个字段，比如我们叫 <code>created_at_diff</code>，那么接口看起来是这个样子</p>
+  <figure class="highlight json"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    <span class="attr">"id"</span>: <span class="number">1</span>,</div><div class="line">    <span class="attr">"user_id"</span>: <span class="number">1</span>,</div><div class="line">    <span class="attr">"title"</span>: <span class="string">"标题"</span>,</div><div class="line">    <span class="attr">"content"</span>: <span class="string">"内容"</span>,</div><div class="line">    <span class="attr">"created_at"</span>: <span class="string">"2017-08-20 15:13:52"</span>,</div><div class="line">    <span class="attr">"created_at_diff"</span>: <span class="string">"5 分钟前"</span>,</div><div class="line">    <span class="attr">"updated_at"</span>: <span class="string">"2017-08-20 15:13:52"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>  接口居然跟设计稿耦合了，接口需要根据产品的一些显示逻辑而改变。抛开设计稿，把这个接口说通，就是，这个接口除了提供完整的资源数据之外，还细心的告诉客户端，你可以这样显示数据。为了让客户端有更好的用户体验，接口也是操碎了心啊。这个接口既然操了这份心，其他的接口是不是也要多操心一下。<br>  ​<br>  那么为什么这个逻辑不能做到客户端里面去呢？谁家的接口会有这种东西啊？</p>
+</li>
+</ul>
+<ul>
+<li><p><strong>​客户端的本地时间可能不准，跟服务器时间做运算的时候可能有异常，所以建议服务器处理</strong></p>
+<p>  其实这是一个时间同步的问题，每一个 http 请求的 response 中其实都会有一个 <code>Date</code> 的 header。这个为了说明报文是什么时候创建的</p>
+<pre><code>Date →Sat, 19 Aug 2017 16:09:39 GMT
+</code></pre><p>  格式也是固定统一的，客户端可以根据这个来完成与创建时间的计算。<br>  或者这个时间差异可以放在最开始，app启动，用户登录，或者获取用户信息的时候，在全局存放时间差，这样也能供其他地方显示使用。</p>
+<p>  再退一步，<code>2017-08-20 15:13:52</code> 和 <code>Sat, 19 Aug 2017 16:09:39 GMT</code> 这样两个时间格式不统一啊，处理不方便，那么我们统一所有接口返回 <code>X-SERVER-DATETIME → 2017-08-20 15:13:52</code> 可好？</p>
+</li>
+</ul>
+<ul>
+<li><p><strong>客户端的运算会耗时，列表数据很多的时候，会卡顿，建议服务器处理</strong></p>
+<p>  这样的时间计算也会卡顿？这该如何来界定，找几个手机，5000次计算测试耗时？怎么都感觉这个计算量是不是太少了点…</p>
+</li>
+<li><p><strong>客户端其实哪怕有一丁点的性能损耗，其实都可以由服务器处理</strong></p>
+<p>  虽然不同意，但是 “额。。。”</p>
+</li>
+<li><p><strong>设计稿变动的时候，客户端的变动成本大，需要重新发布新版本，由服务器处理好了，客户端直接显示，这样变动的成本会低很多</strong></p>
+<p>  客户端显示成什么样，应该由自己控制，行间距啊，最多能显示多少个字，显示的美不美观等等。</p>
+<p>  举个例子，如果现在是客户端直接拿接口数据字符串 “5 分钟前” 显示在某个位置，某一天，产品说，这样不好，显示出来完整的时间，于是服务器数据返回了 “2017年08月20日 15:13:52”，客户端显示不下了，产品说，试试把精确到分钟，于是服务器返回 “2017年08月20日 15:13”，好像可以了。</p>
+<p>  这个例子感觉不应该存在，本来页面完全由客户端控制，变成了由服务器接口控制，是不是没有把各自该做的事情理清楚。页面变动就是应该客户端发版本，这样新旧版本之间都不会出现任何关系，也不会涉及到接口的改变。</p>
+<p>  作为一个接口，不能稳定通用，整天跟着产品样式做变动，感觉好难受。</p>
+</li>
+<li><p><strong>ios 或 android 做这样的数据处理会麻烦很多，服务端处理起来特别方便。</strong></p>
+<p>  逻辑其实都是一样的，根据当前时间与数据时间，做几个对比，有一些if else，只是用不同的语言去实现。不确定是否真的那么麻烦。</p>
+</li>
+</ul>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>考虑到，每个人的理解，说服大家的难度，工时，工期，人力成本，结果是接口增加了一个 <code>created_at_diff</code> 的字段。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;突然回忆起来之前跟同事们争论的一个问题，记录一下。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;主要问题是，当页面中显示 xx 分钟，或 xx 小时，是由服务器处理还是客户端处理。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;举个例子，我们有一个资源，比如帖子吧 posts，数据返回如下&lt;/p&gt;
+&lt;
+    
+    </summary>
+    
+      <category term="REST" scheme="http://blog.lyyw.com/categories/REST/"/>
+    
+    
+      <category term="REST" scheme="http://blog.lyyw.com/tags/REST/"/>
+    
+  </entry>
+  
+  <entry>
     <title>曲突徙薪之恩泽,焦头烂额为上客</title>
-    <link href="http://blog.lyyw.com/2017/08/04/2017-08-04%20%E6%9B%B2%E7%AA%81%E5%BE%99%E8%96%AA%E4%B9%8B%E6%81%A9%E6%B3%BD-%E7%84%A6%E5%A4%B4%E7%83%82%E9%A2%9D%E4%B8%BA%E4%B8%8A%E5%AE%A2/"/>
-    <id>http://blog.lyyw.com/2017/08/04/2017-08-04 曲突徙薪之恩泽-焦头烂额为上客/</id>
+    <link href="http://blog.lyyw.com/2017/08/04/2017-08-04-%E6%9B%B2%E7%AA%81%E5%BE%99%E8%96%AA%E4%B9%8B%E6%81%A9%E6%B3%BD-%E7%84%A6%E5%A4%B4%E7%83%82%E9%A2%9D%E4%B8%BA%E4%B8%8A%E5%AE%A2/"/>
+    <id>http://blog.lyyw.com/2017/08/04/2017-08-04-曲突徙薪之恩泽-焦头烂额为上客/</id>
     <published>2017-08-04T04:18:20.000Z</published>
     <updated>2017-08-08T15:35:20.000Z</updated>
     
@@ -56,8 +128,8 @@
   
   <entry>
     <title>webpack 压缩的一个坑</title>
-    <link href="http://blog.lyyw.com/2017/02/27/2017-02-27%20webpack%E5%8E%8B%E7%BC%A9%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9D%91/"/>
-    <id>http://blog.lyyw.com/2017/02/27/2017-02-27 webpack压缩的一个坑/</id>
+    <link href="http://blog.lyyw.com/2017/02/27/2017-02-27-webpack%E5%8E%8B%E7%BC%A9%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9D%91/"/>
+    <id>http://blog.lyyw.com/2017/02/27/2017-02-27-webpack压缩的一个坑/</id>
     <published>2017-02-27T08:31:41.000Z</published>
     <updated>2017-08-08T15:36:05.000Z</updated>
     
@@ -88,8 +160,8 @@
   
   <entry>
     <title>[翻译] lumen 5.4 中 request 对象的变化</title>
-    <link href="http://blog.lyyw.com/2017/02/18/2017-02-18%20%E7%BF%BB%E8%AF%91-lumen-5-4-%E4%B8%AD-request-%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%8F%98%E5%8C%96/"/>
-    <id>http://blog.lyyw.com/2017/02/18/2017-02-18 翻译-lumen-5-4-中-request-对象的变化/</id>
+    <link href="http://blog.lyyw.com/2017/02/18/2017-02-18-%E7%BF%BB%E8%AF%91-lumen-5-4-%E4%B8%AD-request-%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%8F%98%E5%8C%96/"/>
+    <id>http://blog.lyyw.com/2017/02/18/2017-02-18-翻译-lumen-5-4-中-request-对象的变化/</id>
     <published>2017-02-18T08:00:56.000Z</published>
     <updated>2017-08-02T15:37:20.000Z</updated>
     
@@ -116,8 +188,8 @@
   
   <entry>
     <title>对 REST 的理解</title>
-    <link href="http://blog.lyyw.com/2017/02/09/2017-02-09%20%E5%AF%B9rest%E7%9A%84%E7%90%86%E8%A7%A3/"/>
-    <id>http://blog.lyyw.com/2017/02/09/2017-02-09 对rest的理解/</id>
+    <link href="http://blog.lyyw.com/2017/02/09/2017-02-09-%E5%AF%B9rest%E7%9A%84%E7%90%86%E8%A7%A3/"/>
+    <id>http://blog.lyyw.com/2017/02/09/2017-02-09-对rest的理解/</id>
     <published>2017-02-09T01:58:03.000Z</published>
     <updated>2017-08-02T15:37:07.000Z</updated>
     
@@ -331,8 +403,8 @@
   
   <entry>
     <title>2017 计划</title>
-    <link href="http://blog.lyyw.com/2017/01/05/2017-01-05%202017%E5%B9%B4%E8%AE%A1%E5%88%92/"/>
-    <id>http://blog.lyyw.com/2017/01/05/2017-01-05 2017年计划/</id>
+    <link href="http://blog.lyyw.com/2017/01/05/2017-01-05-2017%E5%B9%B4%E8%AE%A1%E5%88%92/"/>
+    <id>http://blog.lyyw.com/2017/01/05/2017-01-05-2017年计划/</id>
     <published>2017-01-05T15:17:31.000Z</published>
     <updated>2017-08-02T15:36:37.000Z</updated>
     
@@ -366,8 +438,8 @@
   
   <entry>
     <title>数据签名</title>
-    <link href="http://blog.lyyw.com/2016/12/12/2016-12-12%20%E6%95%B0%E6%8D%AE%E7%AD%BE%E5%90%8D/"/>
-    <id>http://blog.lyyw.com/2016/12/12/2016-12-12 数据签名/</id>
+    <link href="http://blog.lyyw.com/2016/12/12/2016-12-12-%E6%95%B0%E6%8D%AE%E7%AD%BE%E5%90%8D/"/>
+    <id>http://blog.lyyw.com/2016/12/12/2016-12-12-数据签名/</id>
     <published>2016-12-12T02:40:48.000Z</published>
     <updated>2017-08-02T15:36:28.000Z</updated>
     
@@ -412,8 +484,8 @@
   
   <entry>
     <title>个人数据库设计原则</title>
-    <link href="http://blog.lyyw.com/2016/11/30/2016-11-30%20how-to-design-database/"/>
-    <id>http://blog.lyyw.com/2016/11/30/2016-11-30 how-to-design-database/</id>
+    <link href="http://blog.lyyw.com/2016/11/30/2016-11-30-how-to-design-database/"/>
+    <id>http://blog.lyyw.com/2016/11/30/2016-11-30-how-to-design-database/</id>
     <published>2016-11-30T11:16:37.000Z</published>
     <updated>2017-08-02T15:36:17.000Z</updated>
     
@@ -456,8 +528,8 @@ http://komlenic.com/244/8-reasons-why-mysqls-enum-data-type-is-evil/
   
   <entry>
     <title>升级 php7 后 isset 不太对了</title>
-    <link href="http://blog.lyyw.com/2016/10/08/2016-10-08%20isset%20%E7%9A%84%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98/"/>
-    <id>http://blog.lyyw.com/2016/10/08/2016-10-08 isset 的使用问题/</id>
+    <link href="http://blog.lyyw.com/2016/10/08/2016-10-08-isset%20%E7%9A%84%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98/"/>
+    <id>http://blog.lyyw.com/2016/10/08/2016-10-08-isset 的使用问题/</id>
     <published>2016-10-08T14:43:02.000Z</published>
     <updated>2017-08-02T15:36:05.000Z</updated>
     
@@ -498,8 +570,8 @@ http://komlenic.com/244/8-reasons-why-mysqls-enum-data-type-is-evil/
   
   <entry>
     <title>composer 使用私有仓库</title>
-    <link href="http://blog.lyyw.com/2016/08/25/2016-08-25%20composer-%E4%BD%BF%E7%94%A8%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93/"/>
-    <id>http://blog.lyyw.com/2016/08/25/2016-08-25 composer-使用私有仓库/</id>
+    <link href="http://blog.lyyw.com/2016/08/25/2016-08-25-composer-%E4%BD%BF%E7%94%A8%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93/"/>
+    <id>http://blog.lyyw.com/2016/08/25/2016-08-25-composer-使用私有仓库/</id>
     <published>2016-08-25T03:54:46.000Z</published>
     <updated>2017-08-02T15:35:55.000Z</updated>
     
@@ -536,8 +608,8 @@ http://komlenic.com/244/8-reasons-why-mysqls-enum-data-type-is-evil/
   
   <entry>
     <title>install gitlab</title>
-    <link href="http://blog.lyyw.com/2016/08/18/2016-08-18%20install-gitlab/"/>
-    <id>http://blog.lyyw.com/2016/08/18/2016-08-18 install-gitlab/</id>
+    <link href="http://blog.lyyw.com/2016/08/18/2016-08-18-install-gitlab/"/>
+    <id>http://blog.lyyw.com/2016/08/18/2016-08-18-install-gitlab/</id>
     <published>2016-08-18T09:35:02.000Z</published>
     <updated>2017-08-02T15:35:45.000Z</updated>
     
@@ -566,8 +638,8 @@ http://komlenic.com/244/8-reasons-why-mysqls-enum-data-type-is-evil/
   
   <entry>
     <title>请正确使用 composer.lock</title>
-    <link href="http://blog.lyyw.com/2016/08/18/2016-08-18%20how-to-use-composer/"/>
-    <id>http://blog.lyyw.com/2016/08/18/2016-08-18 how-to-use-composer/</id>
+    <link href="http://blog.lyyw.com/2016/08/18/2016-08-18-how-to-use-composer/"/>
+    <id>http://blog.lyyw.com/2016/08/18/2016-08-18-how-to-use-composer/</id>
     <published>2016-08-18T07:20:43.000Z</published>
     <updated>2017-08-02T15:35:18.000Z</updated>
     
@@ -609,8 +681,8 @@ http://komlenic.com/244/8-reasons-why-mysqls-enum-data-type-is-evil/
   
   <entry>
     <title>getimagesize得到的不一定是真实值</title>
-    <link href="http://blog.lyyw.com/2016/06/29/2016-06-29%20getimagesize%E5%BE%97%E5%88%B0%E7%9A%84%E4%B8%8D%E4%B8%80%E5%AE%9A%E6%98%AF%E7%9C%9F%E5%AE%9E%E5%80%BC/"/>
-    <id>http://blog.lyyw.com/2016/06/29/2016-06-29 getimagesize得到的不一定是真实值/</id>
+    <link href="http://blog.lyyw.com/2016/06/29/2016-06-29-getimagesize%E5%BE%97%E5%88%B0%E7%9A%84%E4%B8%8D%E4%B8%80%E5%AE%9A%E6%98%AF%E7%9C%9F%E5%AE%9E%E5%80%BC/"/>
+    <id>http://blog.lyyw.com/2016/06/29/2016-06-29-getimagesize得到的不一定是真实值/</id>
     <published>2016-06-29T03:35:23.000Z</published>
     <updated>2017-08-02T15:33:16.000Z</updated>
     
@@ -634,8 +706,8 @@ http://komlenic.com/244/8-reasons-why-mysqls-enum-data-type-is-evil/
   
   <entry>
     <title>各种设备的翻墙问题</title>
-    <link href="http://blog.lyyw.com/2016/06/23/2016-06-23%20gfw-problem/"/>
-    <id>http://blog.lyyw.com/2016/06/23/2016-06-23 gfw-problem/</id>
+    <link href="http://blog.lyyw.com/2016/06/23/2016-06-23-gfw-problem/"/>
+    <id>http://blog.lyyw.com/2016/06/23/2016-06-23-gfw-problem/</id>
     <published>2016-06-22T16:00:26.000Z</published>
     <updated>2017-08-02T15:32:38.000Z</updated>
     
@@ -667,8 +739,8 @@ http://komlenic.com/244/8-reasons-why-mysqls-enum-data-type-is-evil/
   
   <entry>
     <title>ubuntu 搭建 openvpn 记录</title>
-    <link href="http://blog.lyyw.com/2016/05/18/2016-05-18%20ubuntu-%E6%90%AD%E5%BB%BA-openvpn-%E8%AE%B0%E5%BD%95/"/>
-    <id>http://blog.lyyw.com/2016/05/18/2016-05-18 ubuntu-搭建-openvpn-记录/</id>
+    <link href="http://blog.lyyw.com/2016/05/18/2016-05-18-ubuntu-%E6%90%AD%E5%BB%BA-openvpn-%E8%AE%B0%E5%BD%95/"/>
+    <id>http://blog.lyyw.com/2016/05/18/2016-05-18-ubuntu-搭建-openvpn-记录/</id>
     <published>2016-05-18T15:22:28.000Z</published>
     <updated>2017-08-02T15:32:42.000Z</updated>
     
@@ -728,8 +800,8 @@ verb 3
   
   <entry>
     <title>laravel Eloquent save 触发了哪些事件</title>
-    <link href="http://blog.lyyw.com/2016/05/16/2016-05-16%20laravel-Eloquent-Event/"/>
-    <id>http://blog.lyyw.com/2016/05/16/2016-05-16 laravel-Eloquent-Event/</id>
+    <link href="http://blog.lyyw.com/2016/05/16/2016-05-16-laravel-Eloquent-Event/"/>
+    <id>http://blog.lyyw.com/2016/05/16/2016-05-16-laravel-Eloquent-Event/</id>
     <published>2016-05-16T15:17:43.000Z</published>
     <updated>2017-08-02T15:34:58.000Z</updated>
     
@@ -800,8 +872,8 @@ verb 3
   
   <entry>
     <title>2016 计划</title>
-    <link href="http://blog.lyyw.com/2016/05/11/2016-05-11%202016-plan/"/>
-    <id>http://blog.lyyw.com/2016/05/11/2016-05-11 2016-plan/</id>
+    <link href="http://blog.lyyw.com/2016/05/11/2016-05-11-2016-plan/"/>
+    <id>http://blog.lyyw.com/2016/05/11/2016-05-11-2016-plan/</id>
     <published>2016-05-11T15:47:44.000Z</published>
     <updated>2017-08-02T15:31:10.000Z</updated>
     
